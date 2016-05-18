@@ -56,10 +56,6 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 		message (STATUS "texi2pdf not found :( Documentation can not be built")
 	endif()
 
-
-# osl
-	find_package(osl REQUIRED)
-
 # GMP & piplib
 	message(STATUS "---")
 	find_library(gmp_LIB gmp)
@@ -67,13 +63,9 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 		message (STATUS "Library gmp found =) ${gmp_LIB}")
 		set(BITS "MP")
 		add_definitions("-DCANDL_LINEAR_VALUE_IS_MP")
-		# piplib_gmp
-		find_package(piplib_gmp REQUIRED)
 	else()
 		message(STATUS "Library gmp not found :(")
 		add_definitions("-DCANDL_LINEAR_VALUE_IS_LONG_LONG")
-		# piplib_dp
-		find_package(piplib_dp REQUIRED)
 	endif()
 
 # Include directories (to use #include <> instead of #include "")
@@ -117,6 +109,8 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 		${sources}
 	)
 	target_link_libraries(candl ${OSL_LIBRARY})
+	target_include_directories(candl PRIVATE ${OSL_INCLUDE_DIR})
+	target_include_directories(candl PRIVATE ${PIPLIB_INCLUDE_DIR})
 	if (gmp_LIB)
 		target_link_libraries(candl ${PIPLIB_GMP_LIBRARY})
 	else()
@@ -137,6 +131,9 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 		target_link_libraries(candl_static ${PIPLIB_DP_LIBRARY})
 	endif()
 	target_link_libraries(candl_static ${OSL_LIBRARY})
+	target_include_directories(candl_static PRIVATE ${OSL_INCLUDE_DIR})
+	target_include_directories(candl_static PRIVATE ${PIPLIB_INCLUDE_DIR})
+
 	message(STATUS "Add candl library (static)")
 
 
@@ -148,7 +145,9 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 	add_executable(candl_exe "source/candl.c")
 	set_target_properties(candl_exe PROPERTIES OUTPUT_NAME "candl")
 	target_link_libraries(candl_exe candl_static ${OSL_LIBRARY})
-	if (gmp_LIB)
+	target_include_directories(candl_exe PRIVATE ${OSL_INCLUDE_DIR})
+	target_include_directories(candl_exe PRIVATE ${PIPLIB_INCLUDE_DIR})
+if (gmp_LIB)
 		target_link_libraries(candl_exe candl_static ${gmp_LIB})
 	endif()
 
